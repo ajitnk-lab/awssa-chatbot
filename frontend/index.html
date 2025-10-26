@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Solutions Architect Agent</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" type="image/x-icon" href="https://aws.amazon.com/favicon.ico">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1>🤖 AWS Solutions Architect Agent</h1>
+                <p>Find the perfect AWS sample projects for your needs</p>
+            </div>
+        </header>
+
+        <main class="chat-container">
+            <div class="chat-messages" id="chatMessages">
+                <div class="message bot-message">
+                    <div class="message-content">
+                        <p>👋 Hello! I'm your AWS Solutions Architect Agent.</p>
+                        <p>I can help you find the right AWS sample projects from our collection of 925+ repositories. Just tell me:</p>
+                        <ul>
+                            <li>What you're trying to build</li>
+                            <li>Your preferred programming language</li>
+                            <li>AWS services you want to use</li>
+                            <li>Your technical complexity preference</li>
+                        </ul>
+                        <p>How can I help you today?</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <textarea 
+                        id="messageInput" 
+                        placeholder="Ask me about AWS sample projects... (e.g., 'I need a serverless API solution')"
+                        rows="1"
+                    ></textarea>
+                    <button id="sendButton" class="send-button">
+                        <span class="send-icon">➤</span>
+                    </button>
+                </div>
+                <div class="input-footer">
+                    <small>Press Enter to send, Shift+Enter for new line</small>
+                </div>
+            </div>
+        </main>
+
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p>Searching repositories...</p>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>Powered by Amazon Bedrock, Claude 3 Haiku, and Strands Agents</p>
+        <p>925+ AWS sample repositories • Real-time recommendations</p>
+    </footer>
+
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

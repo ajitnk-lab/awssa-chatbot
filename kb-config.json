@@ -1,0 +1,22 @@
+{
+  "name": "AwsReposKnowledgeBase",
+  "description": "Knowledge base for AWS sample repositories",
+  "roleArn": "arn:aws:iam::039920874011:role/AwsReposKnowledgeBaseRole",
+  "knowledgeBaseConfiguration": {
+    "type": "VECTOR",
+    "vectorKnowledgeBaseConfiguration": {
+      "embeddingModelArn": "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0",
+      "embeddingModelConfiguration": {
+        "bedrockEmbeddingModelConfiguration": {
+          "dimensions": 1024
+        }
+      }
+    }
+  },
+  "storageConfiguration": {
+    "type": "S3_VECTORS",
+    "s3VectorsConfiguration": {
+      "vectorBucketArn": "arn:aws:s3:::aws-repos-vectors-039920874011-us-west-2"
+    }
+  }
+}

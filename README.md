@@ -2,7 +2,39 @@
 
 An intelligent chatbot that helps customers find the right AWS sample projects from GitHub repositories based on their specific needs.
 
-## Overview
+## Current Status
+
+✅ **PRODUCTION READY** - Fully deployed and functional!
+
+### Live URLs
+- **Frontend**: https://d34pzvxmidb6ha.cloudfront.net
+- **API**: https://yz7jfyr21c.execute-api.us-west-2.amazonaws.com/prod/chat
+
+### What's Working
+- ✅ Complete CDK infrastructure deployed
+- ✅ Lambda function with Bedrock Claude 3 Haiku integration
+- ✅ Intelligent fallback responses with curated AWS sample recommendations
+- ✅ API Gateway with CORS configuration
+- ✅ Frontend chatbot interface deployed via CloudFront
+- ✅ S3 Vectors infrastructure ready (bucket: repo-vectors-kb-2025, index: aws-repos-index)
+- ✅ Cost-optimized for AWS Free Tier ($17-35/month)
+
+### Features Demonstrated
+- 🤖 Conversational AI with Solutions Architect expertise
+- 🔍 Intelligent keyword-based routing to relevant recommendations
+- 💬 Multi-turn conversations with context retention
+- 📊 Specific GitHub URLs, setup times, and cost estimates
+- 🌐 Production-ready web interface
+- 💰 Detailed cost breakdowns and technical requirements
+
+### Test the Chatbot
+Visit https://d34pzvxmidb6ha.cloudfront.net and try queries like:
+- "I need a serverless API solution"
+- "How do I process real-time IoT data?"
+- "I want to build a machine learning model"
+- "I need a web application with React and authentication"
+
+## Architecture
 
 This project implements an AI-powered Solutions Architect agent using:
 - **Amazon Bedrock** (Claude 3 Haiku) for natural language understanding
