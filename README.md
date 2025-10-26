@@ -2,7 +2,18 @@
 
 An intelligent chatbot that helps customers find the right AWS sample projects from GitHub repositories based on their specific needs.
 
-## Current Status
+## Quick Access
+
+### 🌐 Live Chatbot
+**URL**: https://d34pzvxmidb6ha.cloudfront.net
+
+### 📊 System Status
+- **Knowledge Base**: 899 repositories indexed (97.2% success rate)
+- **Vector Database**: OpenSearch Serverless (aws-repos-vectors)
+- **Backend**: AWS Lambda with Bedrock Claude 3 Haiku
+- **Status**: ✅ Production Ready
+
+---
 
 ✅ **PRODUCTION READY** - Fully deployed with OpenSearch Serverless!
 
@@ -29,7 +40,9 @@ An intelligent chatbot that helps customers find the right AWS sample projects f
 - 💰 Detailed cost breakdowns and technical requirements
 
 ### Test the Chatbot
-Visit https://d34pzvxmidb6ha.cloudfront.net and try queries like:
+**Live URL**: https://d34pzvxmidb6ha.cloudfront.net
+
+Visit the chatbot and try queries like:
 - "I need a serverless API solution"
 - "How do I process real-time IoT data?"
 - "I want to build a machine learning model"
