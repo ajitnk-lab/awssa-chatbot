@@ -12,7 +12,7 @@
 - ✅ Enable model access in Bedrock console:
   - Claude 3 Haiku (`anthropic.claude-3-haiku-20240307-v1:0`)
   - Titan Text Embeddings v2 (`amazon.titan-embed-text-v2:0`)
-- ✅ S3 Vectors preview access (should be available in us-west-2)
+- ✅ OpenSearch Serverless access (available in us-west-2)
 
 ### Development Tools
 - ✅ Node.js 18+ (for CDK)
@@ -62,12 +62,12 @@ Cost Range: {row['cost_range']}
 GenAI/Agentic: {row['genai_agentic']}
             """.strip()
             
-            # Create document
+            # Create document with Bedrock format
             doc = {
-                "repository": row['repository'],
-                "url": row['url'],
-                "searchable_content": searchable_content,
+                "text": searchable_content,
                 "metadata": {
+                    "repository": row['repository'],
+                    "url": row['url'],
                     "description": row.get('description', ''),
                     "solution_type": row['solution_type'],
                     "technical_competencies": row['technical_competencies'],
@@ -102,6 +102,8 @@ Run the script:
 python3 scripts/convert_csv_to_json.py
 ```
 
+This will create files in the proper Bedrock format with "text" and "metadata" fields.
+
 Expected output:
 ```
 ✅ Converted 925 repos to JSON
@@ -115,14 +117,14 @@ Create S3 bucket and upload data:
 
 ```bash
 # Create bucket (replace with unique name)
-BUCKET_NAME="aws-repos-kb-data-$(date +%s)"
+BUCKET_NAME="aws-repos-data-$(date +%s)"
 aws s3 mb s3://${BUCKET_NAME} --region us-west-2
 
-# Upload JSON files
-aws s3 sync data/repos/ s3://${BUCKET_NAME}/repos/ --region us-west-2
+# Upload JSON files to repos_bedrock/ prefix for proper Bedrock format
+aws s3 sync data/repos/ s3://${BUCKET_NAME}/repos_bedrock/ --region us-west-2
 
 # Verify upload
-aws s3 ls s3://${BUCKET_NAME}/repos/ --recursive | wc -l
+aws s3 ls s3://${BUCKET_NAME}/repos_bedrock/ --recursive | wc -l
 # Should show 925
 ```
 
@@ -147,6 +149,7 @@ cdk init app --language typescript
 
 # Install dependencies
 npm install @aws-cdk/aws-bedrock-alpha \
+            @aws-cdk/aws-opensearchserverless \
             @aws-cdk/aws-s3 \
             @aws-cdk/aws-lambda \
             @aws-cdk/aws-apigateway \
@@ -166,6 +169,7 @@ import * as s3 from 'aws-cdk-lib/aws-s3';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as opensearchserverless from 'aws-cdk-lib/aws-opensearchserverless';
 import * as bedrock from '@aws-cdk/aws-bedrock-alpha';
 import { Construct } from 'constructs';
 
@@ -177,13 +181,10 @@ export class AwsReposAgentStack extends cdk.Stack {
     const dataBucketName = this.node.tryGetContext('dataBucketName');
     const dataBucket = s3.Bucket.fromBucketName(this, 'DataBucket', dataBucketName);
 
-    // Create S3 bucket for vectors
-    const vectorBucket = new s3.Bucket(this, 'VectorBucket', {
-      bucketName: `aws-repos-vectors-${this.account}`,
-      encryption: s3.BucketEncryption.S3_MANAGED,
-      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
-      removalPolicy: cdk.RemovalPolicy.DESTROY,
-      autoDeleteObjects: true
+    // Create OpenSearch Serverless collection
+    const collection = new opensearchserverless.CfnCollection(this, 'VectorCollection', {
+      name: 'aws-repos-vectors',
+      type: 'VECTORSEARCH'
     });
 
     // IAM role for Knowledge Base
@@ -194,11 +195,10 @@ export class AwsReposAgentStack extends cdk.Stack {
       ]
     });
 
-    // Grant KB access to buckets
+    // Grant KB access to data bucket and OpenSearch collection
     dataBucket.grantRead(kbRole);
-    vectorBucket.grantReadWrite(kbRole);
 
-    // Create Knowledge Base
+    // Create Knowledge Base with OpenSearch Serverless
     const knowledgeBase = new bedrock.CfnKnowledgeBase(this, 'RepoKB', {
       name: 'aws-repos-knowledge-base',
       roleArn: kbRole.roleArn,
@@ -214,9 +214,15 @@ export class AwsReposAgentStack extends cdk.Stack {
         }
       },
       storageConfiguration: {
-        type: 'S3_VECTORS',
-        s3VectorsConfiguration: {
-          vectorBucketArn: vectorBucket.bucketArn
+        type: 'OPENSEARCH_SERVERLESS',
+        opensearchServerlessConfiguration: {
+          collectionArn: collection.attrArn,
+          vectorIndexName: 'bedrock-knowledge-base-default-index',
+          fieldMapping: {
+            vectorField: 'bedrock-knowledge-base-default-vector',
+            textField: 'AMAZON_BEDROCK_TEXT_CHUNK',
+            metadataField: 'AMAZON_BEDROCK_METADATA'
+          }
         }
       }
     });
@@ -229,7 +235,7 @@ export class AwsReposAgentStack extends cdk.Stack {
         type: 'S3',
         s3Configuration: {
           bucketArn: dataBucket.bucketArn,
-          inclusionPrefixes: ['repos/']
+          inclusionPrefixes: ['repos_bedrock/']  // Use Bedrock format files
         }
       }
     });
@@ -298,6 +304,11 @@ export class AwsReposAgentStack extends cdk.Stack {
     });
 
     // Outputs
+    new cdk.CfnOutput(this, 'CollectionArn', {
+      value: collection.attrArn,
+      description: 'OpenSearch Serverless Collection ARN'
+    });
+
     new cdk.CfnOutput(this, 'KnowledgeBaseId', {
       value: knowledgeBase.attrKnowledgeBaseId,
       description: 'Bedrock Knowledge Base ID'
@@ -348,8 +359,9 @@ Expected output:
 ✅ AwsReposAgentStack
 
 Outputs:
-AwsReposAgentStack.KnowledgeBaseId = XXXXXXXXXX
-AwsReposAgentStack.DataSourceId = YYYYYYYYYY
+AwsReposAgentStack.CollectionArn = arn:aws:aoss:us-west-2:123456789012:collection/xxxxx
+AwsReposAgentStack.KnowledgeBaseId = TOJENJXGHW
+AwsReposAgentStack.DataSourceId = NRTZFOH2YX
 AwsReposAgentStack.ApiUrl = https://xxxxx.execute-api.us-west-2.amazonaws.com/prod/
 AwsReposAgentStack.FrontendUrl = http://aws-repos-frontend-xxxxx.s3-website-us-west-2.amazonaws.com
 ```
@@ -358,7 +370,18 @@ AwsReposAgentStack.FrontendUrl = http://aws-repos-frontend-xxxxx.s3-website-us-w
 
 ### Phase 3: Knowledge Base Sync
 
-#### Step 3.1: Sync Data Source
+#### Step 3.1: Create OpenSearch Index
+
+Before syncing data, create the proper OpenSearch index:
+
+```bash
+# Create index creation script
+python3 create_opensearch_index.py
+
+# This creates the index with proper FAISS configuration
+```
+
+#### Step 3.2: Sync Data Source
 
 ```bash
 # Get IDs from outputs
@@ -372,21 +395,18 @@ aws bedrock-agent start-ingestion-job \
   --region us-west-2
 
 # Check status
-aws bedrock-agent list-ingestion-jobs \
+aws bedrock-agent get-ingestion-job \
   --knowledge-base-id $KB_ID \
   --data-source-id $DS_ID \
+  --ingestion-job-id INGESTION_JOB_ID \
   --region us-west-2
 ```
 
 Wait for status to be `COMPLETE` (10-30 minutes for 925 repos).
 
-Check status periodically:
+Monitor progress:
 ```bash
-watch -n 30 "aws bedrock-agent list-ingestion-jobs \
-  --knowledge-base-id $KB_ID \
-  --data-source-id $DS_ID \
-  --region us-west-2 \
-  --query 'ingestionJobSummaries[0].status'"
+python3 monitor_ingestion.py
 ```
 
 ---

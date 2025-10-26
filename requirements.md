@@ -153,7 +153,7 @@ The chatbot must:
 **Cost Breakdown**:
 - Bedrock KB creation: $5-10 (one-time)
 - Embeddings (925 repos): $5-10 (one-time)
-- S3 Vector storage: $1-2/month
+- OpenSearch Serverless: $1-2/month
 - Lambda invocations: $0.20-1/month (1000 queries)
 - Bedrock LLM calls: $5-10/month (1000 queries with Haiku)
 - API Gateway: $0.10-0.50/month
@@ -163,7 +163,7 @@ The chatbot must:
 
 **Cost Optimization**:
 - Use Claude 3 Haiku (cheapest model)
-- Use S3 Vectors (90% cheaper than OpenSearch)
+- Use OpenSearch Serverless (cost-effective vector search)
 - Lambda (pay-per-use, no idle costs)
 - Set billing alerts at $50
 
@@ -185,7 +185,7 @@ The chatbot must:
 
 - **Lambda**: Auto-scales to handle traffic
 - **Knowledge Base**: Supports 925 repos (can scale to 10K+)
-- **S3 Vectors**: Unlimited storage capacity
+- **OpenSearch Serverless**: Auto-scaling vector search
 - **API Gateway**: Handles 10K requests/second
 
 ---
@@ -219,20 +219,20 @@ The chatbot must:
 ### TR-2: Knowledge Base
 **Priority**: CRITICAL
 
-**Technology**: Amazon Bedrock Knowledge Base with S3 Vectors
+**Technology**: Amazon Bedrock Knowledge Base with OpenSearch Serverless
 
 **Configuration**:
-- **Vector Store**: S3 Vectors (preview)
+- **Vector Store**: OpenSearch Serverless with FAISS engine
 - **Embedding Model**: Amazon Titan Text Embeddings v2
-- **Data Source**: S3 bucket with JSON documents
+- **Data Source**: S3 bucket with Bedrock-formatted JSON documents
 - **Sync**: Manual sync after data upload
 
 **Document Format**:
 ```json
 {
-  "repository": "awslabs/aws-security-automation",
-  "searchable_content": "Collection of scripts and resources for DevSecOps and Automated Incident Response Security. Solution Type: Compliance Accelerators. Technical Competency: Security, Compliance. Customer Problems: Security Gaps, Compliance Burden, Audit Failures. AWS Services: General AWS. Primary Language: Python.",
+  "text": "Collection of scripts and resources for DevSecOps and Automated Incident Response Security. Solution Type: Compliance Accelerators. Technical Competency: Security, Compliance. Customer Problems: Security Gaps, Compliance Burden, Audit Failures. AWS Services: General AWS. Primary Language: Python.",
   "metadata": {
+    "repository": "awslabs/aws-security-automation",
     "url": "https://github.com/awslabs/aws-security-automation",
     "solution_type": "Compliance Accelerators",
     "technical_competencies": "Security, Compliance",
@@ -442,10 +442,10 @@ The chatbot must:
 
 ## Risks and Mitigations
 
-### Risk 1: S3 Vectors Preview Issues
+### Risk 1: OpenSearch Serverless Costs
 **Probability**: Medium  
-**Impact**: High  
-**Mitigation**: Have OpenSearch Serverless as backup plan
+**Impact**: Medium  
+**Mitigation**: Monitor costs daily, use minimal collection size, set billing alerts
 
 ### Risk 2: Credit Exhaustion
 **Probability**: Medium  
@@ -469,7 +469,7 @@ The chatbot must:
 ### External Dependencies
 - AWS Account with Free Tier credits
 - Bedrock model access (Claude 3 Haiku, Titan Embeddings v2)
-- S3 Vectors preview access (us-west-2)
+- OpenSearch Serverless access (us-west-2)
 - GitHub repository data (CSV file)
 
 ### Internal Dependencies
@@ -481,9 +481,10 @@ The chatbot must:
 ## Timeline
 
 ### Phase 1: Infrastructure Setup (Day 1)
-- Convert CSV to JSON
+- Convert CSV to JSON with Bedrock format
 - Upload to S3
-- Create Bedrock Knowledge Base with S3 Vectors
+- Create OpenSearch Serverless collection
+- Create Bedrock Knowledge Base with OpenSearch integration
 - Sync data source
 
 ### Phase 2: Agent Development (Day 2)
@@ -533,7 +534,7 @@ The chatbot must:
 - **Backend**: AWS Lambda (Python 3.12)
 - **Agent Framework**: Strands Agents SDK
 - **LLM**: Claude 3 Haiku (Bedrock)
-- **Vector DB**: S3 Vectors (Bedrock KB)
+- **Vector DB**: OpenSearch Serverless (Bedrock KB)
 - **API**: API Gateway (REST)
 - **Frontend**: HTML/CSS/JavaScript
 - **Hosting**: S3 + CloudFront

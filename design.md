@@ -63,17 +63,19 @@
 │  └───────────────────────────────────────────────────────────┘  │
 │  ┌───────────────────────────────────────────────────────────┐  │
 │  │  Knowledge Base                                           │  │
-│  │  - KB ID: XXXXXXXXXX                                      │  │
+│  │  - KB ID: TOJENJXGHW                                      │  │
 │  │  - Embedding: Titan Text v2                              │  │
-│  │  - Vector Store: S3 Vectors                              │  │
+│  │  - Vector Store: OpenSearch Serverless                   │  │
 │  └───────────────────────────────────────────────────────────┘  │
 └────────────────────────────┬────────────────────────────────────┘
                              │
                              ▼
 ┌─────────────────────────────────────────────────────────────────┐
-│                    S3 Vectors (Vector Store)                     │
+│              OpenSearch Serverless (Vector Store)                │
+│  - Collection: aws-repos-vectors                                │
 │  - 925 repository embeddings                                    │
 │  - Titan Text Embeddings v2 (1024 dimensions)                  │
+│  - FAISS engine with cosine similarity                         │
 │  - Sub-second query latency                                     │
 └────────────────────────────┬────────────────────────────────────┘
                              │
@@ -163,14 +165,14 @@ s3://kb-data-bucket/
 
 #### 2.1 Bedrock Knowledge Base Configuration
 
-**Vector Store**: S3 Vectors (Preview)
+**Vector Store**: OpenSearch Serverless with FAISS engine
 
 **Embedding Model**: Amazon Titan Text Embeddings v2
 - Model ARN: `arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-embed-text-v2:0`
 - Dimensions: 1024
 - Normalize: true
 
-**Data Source**: S3 bucket with JSON documents
+**Data Source**: S3 bucket with Bedrock-formatted JSON documents
 
 **Chunking Strategy**:
 - Strategy: Default (semantic)
@@ -182,6 +184,13 @@ s3://kb-data-bucket/
 
 **CDK Configuration**:
 ```typescript
+// Create OpenSearch Serverless collection
+const collection = new opensearchserverless.CfnCollection(this, 'VectorCollection', {
+  name: 'aws-repos-vectors',
+  type: 'VECTORSEARCH'
+});
+
+// Create Knowledge Base with OpenSearch integration
 const knowledgeBase = new bedrock.CfnKnowledgeBase(this, 'RepoKB', {
   name: 'aws-repos-knowledge-base',
   roleArn: kbRole.roleArn,
@@ -197,9 +206,15 @@ const knowledgeBase = new bedrock.CfnKnowledgeBase(this, 'RepoKB', {
     }
   },
   storageConfiguration: {
-    type: 'S3_VECTORS',
-    s3VectorsConfiguration: {
-      vectorBucketArn: vectorBucket.bucketArn
+    type: 'OPENSEARCH_SERVERLESS',
+    opensearchServerlessConfiguration: {
+      collectionArn: collection.attrArn,
+      vectorIndexName: 'bedrock-knowledge-base-default-index',
+      fieldMapping: {
+        vectorField: 'bedrock-knowledge-base-default-vector',
+        textField: 'AMAZON_BEDROCK_TEXT_CHUNK',
+        metadataField: 'AMAZON_BEDROCK_METADATA'
+      }
     }
   }
 });
@@ -268,7 +283,7 @@ agent = Agent(
     },
     tool_config={
         'retrieve': {
-            'knowledge_base_id': 'XXXXXXXXXX',  # From CDK output
+            'knowledge_base_id': 'TOJENJXGHW',  # OpenSearch Knowledge Base ID
             'max_results': 10,
             'min_score': 0.5
         }
@@ -841,7 +856,7 @@ a:hover {
    b. Decides to query KB or respond directly
    c. If KB query needed:
       - Calls retrieve tool
-      - Bedrock KB searches S3 Vectors
+      - Bedrock KB searches OpenSearch Serverless
       - Returns top 10 results
    d. LLM generates response with recommendations
    ↓
@@ -980,7 +995,8 @@ try {
 ### Current Limits
 - **Lambda**: 10 concurrent executions
 - **API Gateway**: 100 requests/minute
-- **Knowledge Base**: 925 repos (can scale to 10K+)
+- **Knowledge Base**: 925 repos (OpenSearch can scale to millions)
+- **OpenSearch Serverless**: Auto-scaling vector search
 
 ### Scaling Strategy
 - **Horizontal**: Lambda auto-scales
