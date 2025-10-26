@@ -66,9 +66,10 @@ User Browser → CloudFront → S3 (Frontend)
 
 ## Documentation
 
-- **[requirements.md](requirements.md)** - Complete requirements specification
-- **[design.md](design.md)** - Technical design and architecture
-- **[deployment.md](deployment.md)** - Step-by-step deployment guide
+- **[requirements.md](requirements.md)** - Complete requirements specification and business objectives
+- **[design.md](design.md)** - Technical design, architecture, and implementation details
+- **[deployment.md](deployment.md)** - Step-by-step deployment guide and infrastructure setup
+- **[update-data.md](update-data.md)** - Guide for updating Knowledge Base with new CSV data
 
 ## Quick Start
 
@@ -118,33 +119,35 @@ See [deployment.md](deployment.md) for detailed instructions.
 
 ```
 .
-├── README.md                    # This file
-├── requirements.md              # Requirements specification
-├── design.md                    # Technical design
-├── deployment.md                # Deployment guide
-├── classification_results_awslabs.csv  # Repository metadata
+├── README.md                    # This file - project overview and quick start
+├── requirements.md              # Business requirements and success criteria
+├── design.md                    # Technical architecture and component design
+├── deployment.md                # Infrastructure deployment guide
+├── update-data.md               # Knowledge Base data update procedures
+├── classification_results_awslabs.csv  # Repository metadata (925 repos)
 ├── convert_to_bedrock_format.py   # Bedrock format conversion script
-├── create_opensearch_index.py    # OpenSearch index creation
-├── monitor_ingestion.py          # Ingestion monitoring script
+├── create_opensearch_index.py    # OpenSearch index creation script
+├── monitor_ingestion.py          # Ingestion monitoring utility
 ├── scripts/
-│   ├── convert_csv_to_json.py   # Data conversion script
-│   ├── setup_monitoring.sh      # Monitoring setup
-│   └── sync_kb.sh               # Knowledge Base sync
+│   ├── convert_csv_to_json.py   # Legacy data conversion script
+│   ├── setup_monitoring.sh      # Monitoring setup automation
+│   └── sync_kb.sh               # Knowledge Base sync utility
 ├── cdk/                         # CDK infrastructure code
 │   ├── lib/
-│   │   └── cdk-stack.ts        # Main stack definition
-│   └── package.json
+│   │   └── cdk-stack.ts        # Main stack definition with OpenSearch Serverless
+│   └── package.json            # CDK dependencies
 ├── lambda/                      # Lambda function code
-│   ├── lambda_function.py      # Main handler
+│   ├── lambda_function.py      # Main handler with Strands Agent
+│   ├── deploy.sh               # Lambda deployment script
 │   └── requirements.txt        # Python dependencies
-└── frontend/                    # Web chatbot
-    ├── index.html
+└── frontend/                    # Web chatbot interface
+    ├── index.html              # Main chatbot page
     ├── css/
-    │   └── style.css
+    │   └── style.css           # Chatbot styling
     └── js/
-        ├── app.js
-        ├── api.js
-        └── ui.js
+        ├── app.js              # Main application logic
+        ├── api.js              # API client for backend communication
+        └── ui.js               # UI management and interactions
 ```
 
 ## Cost Estimate
