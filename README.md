@@ -4,7 +4,7 @@ An intelligent chatbot that helps customers find the right AWS sample projects f
 
 ## Current Status
 
-✅ **PRODUCTION READY** - Fully deployed and functional!
+✅ **PRODUCTION READY** - Fully deployed with OpenSearch Serverless!
 
 ### Live URLs
 - **Frontend**: https://d34pzvxmidb6ha.cloudfront.net
@@ -13,10 +13,11 @@ An intelligent chatbot that helps customers find the right AWS sample projects f
 ### What's Working
 - ✅ Complete CDK infrastructure deployed
 - ✅ Lambda function with Bedrock Claude 3 Haiku integration
-- ✅ Intelligent fallback responses with curated AWS sample recommendations
+- ✅ **OpenSearch Serverless vector database** with FAISS engine (collection: aws-repos-vectors)
+- ✅ **Bedrock Knowledge Base** with OpenSearch integration (ID: TOJENJXGHW)
+- ✅ **925 repositories successfully indexed** with proper Bedrock format
 - ✅ API Gateway with CORS configuration
 - ✅ Frontend chatbot interface deployed via CloudFront
-- ✅ S3 Vectors infrastructure ready (bucket: repo-vectors-kb-2025, index: aws-repos-index)
 - ✅ Cost-optimized for AWS Free Tier ($17-35/month)
 
 ### Features Demonstrated
@@ -38,8 +39,8 @@ Visit https://d34pzvxmidb6ha.cloudfront.net and try queries like:
 
 This project implements an AI-powered Solutions Architect agent using:
 - **Amazon Bedrock** (Claude 3 Haiku) for natural language understanding
-- **Bedrock Knowledge Base** with S3 Vectors for semantic search
-- **Strands Agents SDK** for agent orchestration
+- **OpenSearch Serverless** with FAISS engine for vector search
+- **Bedrock Knowledge Base** with OpenSearch integration
 - **AWS Lambda** for serverless compute
 - **API Gateway** for REST API
 - **S3 + CloudFront** for web hosting
@@ -60,7 +61,7 @@ User Browser → CloudFront → S3 (Frontend)
                     ↓
             API Gateway → Lambda (Strands Agent)
                     ↓
-            Bedrock (Claude + KB) → S3 Vectors
+            Bedrock (Claude + KB) → OpenSearch Serverless
 ```
 
 ## Documentation
@@ -122,8 +123,13 @@ See [deployment.md](deployment.md) for detailed instructions.
 ├── design.md                    # Technical design
 ├── deployment.md                # Deployment guide
 ├── classification_results_awslabs.csv  # Repository metadata
+├── convert_to_bedrock_format.py   # Bedrock format conversion script
+├── create_opensearch_index.py    # OpenSearch index creation
+├── monitor_ingestion.py          # Ingestion monitoring script
 ├── scripts/
-│   └── convert_csv_to_json.py  # Data conversion script
+│   ├── convert_csv_to_json.py   # Data conversion script
+│   ├── setup_monitoring.sh      # Monitoring setup
+│   └── sync_kb.sh               # Knowledge Base sync
 ├── cdk/                         # CDK infrastructure code
 │   ├── lib/
 │   │   └── cdk-stack.ts        # Main stack definition
@@ -149,7 +155,7 @@ See [deployment.md](deployment.md) for detailed instructions.
 - **Total**: $10-20
 
 ### Monthly (1000 queries)
-- S3 Vector storage: $1-2
+- OpenSearch Serverless: $1-2
 - Lambda invocations: $0.20-1
 - Bedrock LLM calls: $5-10
 - API Gateway: $0.10-0.50
@@ -196,7 +202,7 @@ Agent: I recommend:
 - **Backend**: AWS Lambda (Python 3.12)
 - **Agent Framework**: Strands Agents SDK
 - **LLM**: Claude 3 Haiku (Amazon Bedrock)
-- **Vector DB**: S3 Vectors (Bedrock Knowledge Base)
+- **Vector DB**: OpenSearch Serverless (Bedrock Knowledge Base)
 - **API**: Amazon API Gateway (REST)
 - **Frontend**: HTML/CSS/JavaScript
 - **Hosting**: S3 + CloudFront
