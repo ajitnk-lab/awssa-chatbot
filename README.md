@@ -4,13 +4,15 @@ An intelligent chatbot that helps customers find the right AWS sample projects f
 
 ## Quick Access
 
-### 🌐 Live Chatbot
-**URL**: https://d34pzvxmidb6ha.cloudfront.net
+### 🌐 Live Chatbots
+**Custom RAG Agent**: https://d34pzvxmidb6ha.cloudfront.net  
+**Q Business App**: https://6fvgkeyi.chat.qbusiness.us-east-1.on.aws?code=73e4f991-8b32-49d5-8fb3-8e03a3dcc5bc
 
 ### 📊 System Status
 - **Knowledge Base**: 899 repositories indexed (97.2% success rate)
 - **Vector Database**: OpenSearch Serverless (aws-repos-vectors)
 - **Backend**: AWS Lambda with Bedrock Claude 3 Haiku
+- **Q Business**: 60-day free trial (until Dec 25, 2025)
 - **Status**: ✅ Production Ready
 
 ---
@@ -39,14 +41,23 @@ An intelligent chatbot that helps customers find the right AWS sample projects f
 - 🌐 Production-ready web interface
 - 💰 Detailed cost breakdowns and technical requirements
 
-### Test the Chatbot
-**Live URL**: https://d34pzvxmidb6ha.cloudfront.net
+### Test the Chatbots
 
-Visit the chatbot and try queries like:
+**Custom RAG Agent**: https://d34pzvxmidb6ha.cloudfront.net
+- Uses structured CSV metadata with OpenSearch Serverless
+- 925 awslabs repositories with custom classifications
+- Business-oriented filtering (cost, setup time, competencies)
+
+**Q Business App**: https://6fvgkeyi.chat.qbusiness.us-east-1.on.aws?code=73e4f991-8b32-49d5-8fb3-8e03a3dcc5bc
+- Uses web crawler for fresh GitHub content
+- Automatic content updates
+- 60-day free trial (until Dec 25, 2025)
+
+Try queries like:
 - "I need a serverless API solution"
 - "How do I process real-time IoT data?"
 - "I want to build a machine learning model"
-- "I need a web application with React and authentication"
+- "Show me quick-setup, low-cost compliance solutions"
 
 ## Architecture
 
@@ -165,12 +176,13 @@ See [deployment.md](deployment.md) for detailed instructions.
 
 ## Cost Estimate
 
-### One-Time Setup
+### Custom RAG Agent
+**One-Time Setup**
 - Knowledge Base creation: $5-10
 - Embeddings (925 repos): $5-10
 - **Total**: $10-20
 
-### Monthly (1000 queries)
+**Monthly (1000 queries)**
 - OpenSearch Serverless: $1-2
 - Lambda invocations: $0.20-1
 - Bedrock LLM calls: $5-10
@@ -179,6 +191,16 @@ See [deployment.md](deployment.md) for detailed instructions.
 - **Total**: $7-15/month
 
 **First Month Total**: $17-35
+
+### Q Business App
+**Current Status**: 60-day free trial (until Dec 25, 2025)
+
+**After Free Trial**
+- Consumption pricing: $200 for 30,000 units/month
+- 2 units per query = 15,000 queries for $200/month
+- Index charges: $0.140-0.264/hour for data crawling
+
+**Comparison**: Custom RAG is more cost-effective for moderate usage
 
 ## Usage Examples
 
